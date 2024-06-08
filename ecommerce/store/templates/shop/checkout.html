@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<h2>Checkout</h2>
+<p>Total amount: ${{ total_amount }}</p>
+
+<form action="{% url 'checkout' %}" method="POST" id="checkout-form">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="id_name">Name</label>
+        {{ form.name }}
+    </div>
+    <div class="form-group">
+        <label for="id_email">Email</label>
+        {{ form.email }}
+    </div>
+    <div class="form-group">
+        <label for="id_phone_number">Phone Number</label>
+        {{ form.phone_number }}
+    </div>
+    <div class="form-group">
+        <label for="id_address">Address</label>
+        {{ form.address }}
+    </div>
+    {{ form.stripeToken }}
+
+    <button id="stripe-button" class="btn btn-primary">Pay Now</button>
+</form>
+
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+document.getElementById('stripe-button').addEventListener('click', function(e) {
+    e.preventDefault();
+    var email = document.getElementById('id_email').value;
+    var stripeHandler = StripeCheckout.configure({
+        key: '{{ stripe_public_key }}',
+        amount: {{ total_amount|multiply:100 }},
+        currency: 'usd',
+        name: 'Your Shop Name',
+        description: 'Payment for your order',
+        email: email,
+        locale: 'auto',
+        token: function(token) {
+            var form = document.getElementById('checkout-form');
+            var hiddenInput = document.createElement('input');
+            hiddenInput.setAttribute('type', 'hidden');
+            hiddenInput.setAttribute('name', 'stripeToken');
+            hiddenInput.setAttribute('value', token.id);
+            form.appendChild(hiddenInput);
+            form.submit();
+        }
+    });
+    stripeHandler.open();
+});
+</script>
+{% endblock %}

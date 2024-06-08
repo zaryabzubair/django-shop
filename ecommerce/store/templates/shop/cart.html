@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load custom_filters %}
+
+{% block title %}Your Cart{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="my-4">Your Cart</h1>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Quantity</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product_id, product in cart.items %}
+                <tr>
+                    <td><img src="{{ product.image_url }}" alt="{{ product.name }}" class="img-fluid" style="max-width: 50px;"></td>
+                    <td><span class="text-md">{{ product.name }}</span></td>
+                    <td><span class="text-md">${{ product.price }}</span></td>
+                    <td><span class="text-md">{{ product.quantity }}</span></td>
+                    <td><span class="text-md">${{ product.price|multiply:product.quantity }}</span></td>
+                    <td>
+                        <a href="{% url 'remove_from_cart' product_id %}" class="btn btn-danger btn-sm">Remove</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <p class="text-md">Total amount: ${{ total_amount }}</p>
+    <div class="text-center">
+        <a href="{% url 'checkout' %}" class="btn btn-primary">Proceed to Checkout</a>
+    </div>
+</div>
+{% endblock %}
